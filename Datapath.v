@@ -16,7 +16,7 @@ parameter x2bitZero = 2'b00;
 
 reg [63:0] IF_ID_reg;
 reg [147:0] ID_EX_reg;
-reg [82:0] EX_MEM_reg;
+reg [84:0] EX_MEM_reg;
 
 reg [31:0] Imemory [0:1023]; //InstructionMemory
 reg [31:0] PCcurrent, PCnext; 
@@ -66,9 +66,9 @@ end
 	
 always @ (posedge clk) //pc	   //InstructionMemory
 	begin	 
-	  if (control[7] == 1)
+	  if (EX_MEM_reg[83] == 1) //branch
 	    begin
-	      PCnext = EX_MEM_reg[73:42];
+	      PCnext = EX_MEM_reg[75:44];
 	    end
 	  PCcurrent = PCnext;
 	  PCnext = PCnext + 4;
@@ -83,7 +83,8 @@ always @(negedge clk) // Decode
     opcodeReg = IF_ID_reg[31:26];
     readData1 = memoryReg[IF_ID_reg[25:21]];
     readData2 = memoryReg[IF_ID_reg[20:16]];
-    signExtend = {x16bitZero, IF_ID_reg[15:0]};
+    if (IF_ID_reg[15] == 1) signExtend = {16'b1111111111111111, IF_ID_reg[15:0]};
+    else signExtend = {16'b00000000000000000, IF_ID_reg[15:0]};
     shiftOut = {signExtend[29:0], x2bitZero};
     ID_EX_reg = {control, IF_ID_reg[63:32], readData1, readData2, shiftOut, IF_ID_reg[20:16], IF_ID_reg[15:11]};
                             // pcnext
@@ -91,7 +92,7 @@ always @(negedge clk) // Decode
 
 always @(posedge clk) // ALU
 begin
-  case (control[1:0]) //aluop
+  case (ID_EX_reg[139:138]) //aluop
     R_type:
       begin
         case (ID_EX_reg[17:12]) //function

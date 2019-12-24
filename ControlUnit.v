@@ -11,7 +11,7 @@ module ControlUnit(
   parameter sw=6'b101011;
   parameter beq=6'b000100;
   
-  assign CU = {RegDst, branch, Memread, MemtoReg, MemWrite, RegWrite, AluSrc,ALUop};
+  assign CU = {RegDst, branch, Memread, MemtoReg, MemWrite, RegWrite, AluSrc, ALUop};
   
   always @(posedge reset)
   begin
